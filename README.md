@@ -24,8 +24,6 @@ Basic features include -
 
 ## Install Instruction
 
-- At first download or clone [Expense Tracker 💰 Lumen](https://github.com/rahulhaque/expense-tracker-lumen) backend. Setup and configure the backend. Click the link for detail.
-- Considering the backend is up and running, now download or clone this repo.
 - Open terminal and `cd` into the directory.
 - Run `npm i` to install the dependencies.
 - Copy and save `.env.example` file as `.env`. Set API host in the `.env` file if necessary.
