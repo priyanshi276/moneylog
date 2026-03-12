@@ -55,8 +55,4 @@ Additionally I have added a custom template in the `extra` folder. The template 
 7. Currency
 <img title="Currency" src="https://github.com/rahulhaque/expense-tracker-react/blob/master/screenshots/screen_7.png" width="100%">
 
-## More Info
 
-This project is solely made for learning purposes. The structure of the project and the code practices may prove useful to  new learners who are exploring new technologies.
-
-Spare a ⭐ to keep me motivated. 😃
