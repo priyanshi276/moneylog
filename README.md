@@ -1,8 +1,6 @@
 # Expense Tracker Web 💰 React
 
-Simple income/expense tracker app web frontend built with React and 💕
-
-This is the Expense Tracker Web frontend for [Expense Tracker 💰 Lumen](https://github.com/rahulhaque/expense-tracker-lumen) backend. You can find the backend repo and API documentation in the above link.
+Simple income/expense tracker app 
 
 ## Features
 Basic features include -
