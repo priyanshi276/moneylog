@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Build outputs
+dist/
+build/
+
+# Database (contains real user data)
+backend/db.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+* text=auto
+```
+
+Or create a `.gitattributes` file in your project root:
+```
+* text=auto eol=lf
+*.bat text eol=crlf
