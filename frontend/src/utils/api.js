@@ -5,8 +5,25 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Restore token on page load
-const token = localStorage.getItem('token');
-if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+// ✅ Read token fresh from localStorage on EVERY request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => Promise.reject(error));
+
+// Redirect to login on 401
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
