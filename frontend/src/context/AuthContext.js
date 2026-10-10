@@ -21,6 +21,10 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+  const res = await api.get('/auth/me');
+  setUser(res.data.user);
+}, []);
   const login = useCallback(async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     const { token, user } = res.data;
@@ -41,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
