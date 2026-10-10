@@ -5,15 +5,21 @@ const INCOME_CATEGORIES  = ['Salary', 'Freelance', 'Business', 'Investment', 'Gi
 const EXPENSE_CATEGORIES = ['Food & Dining', 'Transportation', 'Shopping', 'Entertainment', 'Bills & Utilities',
   'Healthcare', 'Education', 'Travel', 'Groceries', 'Rent', 'Insurance', 'Subscriptions', 'Other Expense'];
 
+const API_ORIGIN = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+
 const today = () => new Date().toISOString().split('T')[0];
 
-const EMPTY = { type: 'expense', amount: '', description: '', category: '', date: today(), notes: '' };
+const EMPTY = { type: 'expense', amount: '', description: '', category: '', date: today(), notes: '', account_id: '' };
 
 export default function TransactionModal({ isOpen, onClose, onSaved, editData }) {
   const [form,    setForm]    = useState(EMPTY);
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [accounts, setAccounts] = useState([]);
+
+  const [receiptFile, setReceiptFile]       = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
 
   const isEditing = !!editData;
 
@@ -21,11 +27,15 @@ export default function TransactionModal({ isOpen, onClose, onSaved, editData })
     if (isOpen) {
       setErrors({});
       setApiError('');
+      setReceiptFile(null);
+      setReceiptPreview(editData?.receipt_url || null);
       setForm(editData
         ? { type: editData.type, amount: String(editData.amount), description: editData.description,
-            category: editData.category, date: editData.date, notes: editData.notes || '' }
+            category: editData.category, date: editData.date, notes: editData.notes || '',
+            account_id: editData.account_id || '' }
         : EMPTY
       );
+      api.get('/accounts').then(res => setAccounts(res.data.data)).catch(() => {});
     }
   }, [isOpen, editData]);
 
@@ -40,6 +50,19 @@ export default function TransactionModal({ isOpen, onClose, onSaved, editData })
       return next;
     });
     setErrors(er => ({ ...er, [name]: '' }));
+  };
+
+  const handleReceiptChange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      setReceiptFile(file);
+      setReceiptPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeReceipt = () => {
+    setReceiptFile(null);
+    setReceiptPreview(null);
   };
 
   const validate = () => {
@@ -58,11 +81,21 @@ export default function TransactionModal({ isOpen, onClose, onSaved, editData })
     setLoading(true);
     setApiError('');
     try {
+      let saved;
       if (isEditing) {
-        await api.put(`/transactions/${editData.id}`, form);
+        saved = await api.put(`/transactions/${editData.id}`, form);
       } else {
-        await api.post('/transactions', form);
+        saved = await api.post('/transactions', form);
       }
+
+      if (receiptFile) {
+        const fd = new FormData();
+        fd.append('receipt', receiptFile);
+        await api.post(`/transactions/${saved.data.data.id}/receipt`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -133,11 +166,39 @@ export default function TransactionModal({ isOpen, onClose, onSaved, editData })
               {errors.category && <p className="form-error">{errors.category}</p>}
             </div>
 
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group">
+              <label className="form-label">Account <span className="text-muted">(optional)</span></label>
+              <select name="account_id" className={`form-control ${errors.account_id ? 'error' : ''}`}
+                value={form.account_id} onChange={handleChange}>
+                <option value="">No account</option>
+                {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+              {errors.account_id && <p className="form-error">{errors.account_id}</p>}
+            </div>
+
+            <div className="form-group">
               <label className="form-label">Notes <span className="text-muted">(optional)</span></label>
               <textarea name="notes" className="form-control" rows={2}
                 placeholder="Any additional notes…" value={form.notes} onChange={handleChange}
                 style={{ resize: 'vertical', minHeight: 64 }} />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Receipt <span className="text-muted">(optional)</span></label>
+              {receiptPreview ? (
+                <div style={{ position: 'relative', width: 100 }}>
+                  <img
+                    src={receiptPreview.startsWith('blob:') ? receiptPreview : `${API_ORIGIN}${receiptPreview}`}
+                    alt="Receipt"
+                    style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }}
+                  />
+                  <button type="button" onClick={removeReceipt}
+                    style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%',
+                      background: 'var(--red)', color: '#fff', border: 'none', fontSize: 11, cursor: 'pointer' }}>✕</button>
+                </div>
+              ) : (
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleReceiptChange} className="form-control" />
+              )}
             </div>
           </form>
         </div>

@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import NotificationBell from './NotificationBell';
 
 const NAV_ITEMS = [
   { to: '/dashboard',    icon: '📊', label: 'Dashboard' },
   { to: '/transactions', icon: '💳', label: 'Transactions' },
+  { to: '/settings', icon: '⚙️', label: 'Settings' },
 ];
 
 const PAGE_TITLES = {
   '/dashboard':    { title: 'Dashboard',    sub: 'Your financial overview' },
   '/transactions': { title: 'Transactions', sub: 'All income & expense records' },
+  '/settings': { title: 'Settings', sub: 'Manage your profile & security' },
 };
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const info = PAGE_TITLES[location.pathname] || { title: 'ExpenseTrack', sub: '' };
 
@@ -78,6 +83,10 @@ export default function Layout() {
             </div>
           </div>
           <div className="topbar-actions">
+            <button className="icon-btn" onClick={toggleTheme} title="Toggle theme">
+  {theme === 'dark' ? '☀️' : '🌙'}
+</button>
+<NotificationBell />
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
               {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             </div>

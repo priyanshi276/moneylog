@@ -66,6 +66,9 @@ export default function Login() {
               required
             />
           </div>
+          <p style={{ textAlign: 'right', fontSize: 12, marginTop: -8, marginBottom: 16 }}>
+  <Link to="/forgot-password" className="auth-link">Forgot password?</Link>
+</p>
 
           <button
             type="submit"
